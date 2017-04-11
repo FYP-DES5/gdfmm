@@ -27,7 +27,7 @@ cdef extern from "../include/gdfmm/gdfmm.h" namespace "gdfmm":
         Mat InPaint(const Mat &depth, const Mat &rgb) except +
         Mat InPaint2(const Mat &depth, const Mat &rgb, float epsilon, float constant) except +
 
-def InpaintDepth2(np.ndarray[np.float64, ndim=2, mode="c"] dep,
+def InpaintDepth2(np.ndarray[float, ndim=2, mode="c"] dep,
                  np.ndarray[np.uint8_t, ndim=3, mode="c"] rgb,
                  float epsilon,
                  float constant,
@@ -39,7 +39,7 @@ def InpaintDepth2(np.ndarray[np.float64, ndim=2, mode="c"] dep,
     rv = np.zeros((dep.shape[0], dep.shape[1]), dtype=np.float64, order="C")
 
     rgbM = Mat(rgb.shape[0], rgb.shape[1], CV_8UC3, np.PyArray_DATA(rgb))
-    depM = Mat(dep.shape[0], dep.shape[1], CV_64F, np.PyArray_DATA(dep))
+    depM = Mat(dep.shape[0], dep.shape[1], float, np.PyArray_DATA(dep))
 
     cdef void *p
     p = np.PyArray_DATA(dep)
