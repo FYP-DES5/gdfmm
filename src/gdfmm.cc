@@ -128,7 +128,7 @@ cv::Mat GDFMM::InPaintBase(const cv::Mat &depthImageOriginal,
   // depth gradient
 //  cv::Mat depthGradientX(depthImageOriginal.rows, depthImageOriginal.cols, CV_32F);
 //  cv::Mat depthGradientY(depthImageOriginal.rows, depthImageOriginal.cols, CV_32F);
-  
+
   // Cannot use Sobel, because depth is sometimes unknown
   depthImageOriginal.convertTo(depthImage, CV_32F);
 // ComputeDepthGradients(depthImage, &depthGradientX, &depthGradientY);
@@ -148,7 +148,7 @@ cv::Mat GDFMM::InPaintBase(const cv::Mat &depthImageOriginal,
   for (int y=0; y<rgbImage.rows; y++) {
     for (int x=0; x<rgbImage.cols; x++) {
       for (int c=0; c<3; c++) {
-        rgbGradientStrength.at<cv::Vec3f>(y, x)[c] = 
+        rgbGradientStrength.at<cv::Vec3f>(y, x)[c] =
             rgbGradientX.at<cv::Vec3f>(y, x)[c] * rgbGradientX.at<cv::Vec3f>(y, x)[c] +
             rgbGradientY.at<cv::Vec3f>(y, x)[c] * rgbGradientY.at<cv::Vec3f>(y, x)[c];
       }
@@ -189,7 +189,7 @@ cv::Mat GDFMM::InPaintBase(const cv::Mat &depthImageOriginal,
 
     std::tie(speed, position) = narrowBand.top();
     narrowBand.pop();
-    
+
     // use 4-neighbour
     const Point neighbours[] {
       {0,1},{1,0},{-1,0},{0,-1}
@@ -209,7 +209,7 @@ cv::Mat GDFMM::InPaintBase(const cv::Mat &depthImageOriginal,
                       neighbour.x, neighbour.y);
 
         depthImage.at<float>(neighbour.y, neighbour.x) = prediction;
-        
+
         if (prediction != 0) {
           float T = ComputeSpeed(rgbGradientStrength, neighbour);
           narrowBand.emplace(T, neighbour);
@@ -262,7 +262,7 @@ float GDFMM::BilateralWeight(const Point &p1,
 //   int lowerX = std::max(0, p1.x - windowRadius);
 //   int upperY = std::min(rgbImage.rows - 1, static_cast<int>(p1.y + windowRadius));
 //   int upperX = std::min(rgbImage.cols - 1, static_cast<int>(p1.x + windowRadius));
-// 
+//
 //   int num_known = 0;
 //   Eigen::Vector3f sumI(0,0,0);
 //   Eigen::Vector3f sumI2(0,0,0);
@@ -303,14 +303,14 @@ float GDFMM::PredictDepth(const cv::Mat &depthImage,
 
       float gX, gY;
       std::tie(gX, gY) = ComputeDepthGradient(depthImage, m, n);
-      float gradientTerm = gX * (x-m) + gY * (y-n); 
+      float gradientTerm = gX * (x-m) + gY * (y-n);
 
       sumValues += weight * (depth /*+ gradientTerm*/);
       sumWeights += weight;
       count ++;
     }
   }
-  
+
   if (count <= 3) {
     return 0;
   }
@@ -380,7 +380,7 @@ float GDFMM::PredictDepth2(const cv::Mat &depthImage,
       }
     }
   }
-  
+
   // Find mean
   Eigen::Array<float, 1, 4> mX = X.colwise().mean();
   Eigen::Array<float, 1, 1> mY = Y.colwise().mean();
@@ -413,7 +413,7 @@ float GDFMM::PredictDepth2(const cv::Mat &depthImage,
   beta = cov.ldlt().solve(xy.matrix().transpose());
 //  Eigen::Array<float, 1, 4> xy = (X.colwise() * Y).colwise().mean();
 //  beta = cov.ldlt().solve(xy.matrix().transpose());
-  
+
   Eigen::Vector4f test(
             rgbImage.at<uint8_t[3]>(y, x)[0],
             rgbImage.at<uint8_t[3]>(y, x)[1],
@@ -435,7 +435,7 @@ float GDFMM::PredictDepth2(const cv::Mat &depthImage,
 //  std::cout << num_known << std::endl;
 //  std::cout << beta.dot(test) << std::endl;
   float prediction = beta.dot(test) + mY(0,0);
-  assert(!isnan(prediction));
+  assert(!std::isnan(prediction));
 
   // constrain the results to within a sane range
 //  float meanY = Y.mean();
@@ -458,9 +458,9 @@ float GDFMM::PredictDepth2(const cv::Mat &depthImage,
 static float ComputeSpeed(const cv::Mat &gradientStrength,
                           const Point &position)
 {
-  return -1.0f / (1 + 
-      gradientStrength.at<float[3]>(position.y, position.x)[0] + 
-      gradientStrength.at<float[3]>(position.y, position.x)[1] + 
+  return -1.0f / (1 +
+      gradientStrength.at<float[3]>(position.y, position.x)[0] +
+      gradientStrength.at<float[3]>(position.y, position.x)[1] +
       gradientStrength.at<float[3]>(position.y, position.x)[2]
       );
 }
