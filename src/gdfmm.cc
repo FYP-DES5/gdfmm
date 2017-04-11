@@ -228,11 +228,11 @@ cv::Mat GDFMM::InPaintBase(const cv::Mat &depthImageOriginal,
   }
 
   if (output) {
-    depthImage.convertTo(*output, CV_16U);
+    depthImage.convertTo(*output, CV_64F);
     return *output;
   }
   else {
-    depthImage.convertTo(depthImage, CV_16U);
+    depthImage.convertTo(depthImage, CV_64F);
     return depthImage;
   }
 }

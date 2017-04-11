@@ -27,7 +27,7 @@ cdef extern from "../include/gdfmm/gdfmm.h" namespace "gdfmm":
         Mat InPaint(const Mat &depth, const Mat &rgb) except +
         Mat InPaint2(const Mat &depth, const Mat &rgb, float epsilon, float constant) except +
 
-def InpaintDepth2(np.ndarray[np.uint16_t, ndim=2, mode="c"] dep,
+def InpaintDepth2(np.ndarray[np.float64, ndim=2, mode="c"] dep,
                  np.ndarray[np.uint8_t, ndim=3, mode="c"] rgb,
                  float epsilon,
                  float constant,
@@ -36,15 +36,13 @@ def InpaintDepth2(np.ndarray[np.uint16_t, ndim=2, mode="c"] dep,
                  float blur_sigma = 1,
                  int window_size = 7):
     cdef Mat rgbM, depM, rvM
-    rv = np.zeros((dep.shape[0], dep.shape[1]), dtype=np.uint16, order="C")
+    rv = np.zeros((dep.shape[0], dep.shape[1]), dtype=np.float64, order="C")
 
     rgbM = Mat(rgb.shape[0], rgb.shape[1], CV_8UC3, np.PyArray_DATA(rgb))
-    depM = Mat(dep.shape[0], dep.shape[1], CV_16U, np.PyArray_DATA(dep))
+    depM = Mat(dep.shape[0], dep.shape[1], CV_64F, np.PyArray_DATA(dep))
 
     cdef void *p
     p = np.PyArray_DATA(dep)
-    printf("%p\n", p)
-#    print atoi(int(p))
 
     cdef GDFMM *gdfmm;
     gdfmm = new GDFMM(sigma_distance, sigma_color, blur_sigma, window_size);
@@ -53,7 +51,7 @@ def InpaintDepth2(np.ndarray[np.uint16_t, ndim=2, mode="c"] dep,
     del gdfmm
     memcpy(np.PyArray_DATA(rv),
            rvM.data,
-           2*dep.shape[0]*dep.shape[1])
+           8*dep.shape[0]*dep.shape[1])
     return rv
 
 def InpaintDepth(np.ndarray[np.uint16_t, ndim=2, mode="c"] dep,
